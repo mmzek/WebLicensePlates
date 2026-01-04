@@ -1,5 +1,7 @@
 ## 🚘 License Plates App
+
 This is a web application for browsing registration plates' codes, finding information about their origin and learning fun facts! It also contains a quiz to test your knowledge about license plates.
+
 ## 🛠️ Technologies
 
 The project is built with the tech stack:
@@ -29,4 +31,3 @@ The project is built with the tech stack:
    ```bash
    http://localhost:3000
    ```
-
