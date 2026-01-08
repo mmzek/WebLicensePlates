@@ -1,7 +1,7 @@
 @import "tailwindcss";
-@import "tw-animate-css";
 
 @theme inline {
+  --animate-breath: breath 3s ease-in-out infinite;
   --radius-sm: calc(var(--radius) - 4px);
   --radius-md: calc(var(--radius) - 2px);
   --radius-lg: var(--radius);
@@ -43,6 +43,17 @@
   --color-sidebar-ring: oklch(0.556 0 0);
 }
 
+@keyframes breath {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.6;
+  }
+  50% {
+    transform: scale(1.05);
+    opacity: 1;
+  }
+}
+
 :root {
   --radius: 0.625rem;
 }
@@ -75,4 +86,31 @@
 .command-scroll {
   scrollbar-width: thin;
   scrollbar-color: #4e4e4e transparent;
+}
+
+/* globals.css */
+
+.plate-card {
+  position: relative;
+  background-color: #1f1f1f;
+  border: 1px solid rgba(255, 255, 255, 0.05);
+  border-radius: 1rem;
+  padding: 1.5rem;
+  transition: all 0.3s ease-in-out;
+  cursor: pointer;
+}
+
+.plate-card:hover {
+  border-color: rgba(59, 130, 246, 0.5);
+  transform: translateY(-1px);
+  box-shadow: 0 0 30px 2px rgba(59, 130, 246, 0.3);
+}
+
+.filter{
+  border: 1px solid rgba(255, 255, 255, 0.05);
+}
+.filter:hover {
+  border-color: rgba(59, 130, 246, 0.5);
+  transform: translateY(-1px);
+  box-shadow: 0 0 30px 2px rgba(59, 130, 246, 0.3);
 }
