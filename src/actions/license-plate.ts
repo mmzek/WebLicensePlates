@@ -13,7 +13,7 @@ export interface LicensePlate {
   numberOfViews: number;
 }
 
-interface LicensePlateApi {
+export interface LicensePlateApi {
   registrationPlateId: number;
   code: string;
   district: {
