@@ -28,8 +28,8 @@ export default function Browser() {
 
   const { data: licensePlates = [], isLoading } = useLicensePlates(searchCode);
   return (
-    <div className="px-4 py-10">
-      Wyszukaj rejestrację po kodzie
+    <div className="px-4 py-6">
+     <h1 className="text-xs font-bold uppercase tracking-widest text-blue-400">Wyszukaj rejestrację po kodzie</h1>
       <Command shouldFilter={false} className="my-6 command-scroll">
         <CommandInput
           value={inputValue}
