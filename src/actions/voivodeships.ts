@@ -1,6 +1,6 @@
 export interface Voivodeship {
-  voivodeshipId: number,
-  name: string,
+  voivodeshipId: number;
+  name: string;
 }
 
 export async function getVoivodeships(): Promise<Voivodeship[]> {
@@ -14,4 +14,3 @@ export async function getVoivodeships(): Promise<Voivodeship[]> {
 
   return response.json();
 }
-

@@ -20,7 +20,7 @@ export default function PolandMap({ onSelect, locked }: PolandMapProps) {
     if (!svg) return;
 
     const paths = document.querySelectorAll(
-      "path[id^='PL-']"
+      "path[id^='PL-']",
     ) as NodeListOf<SVGPathElement>;
 
     const tooltip = document.getElementById("tooltip");

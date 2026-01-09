@@ -1,7 +1,7 @@
 export interface QuizQuestions {
-    code: string,
-    voivodeship: string,
-    district: string,
+  code: string;
+  voivodeship: string;
+  district: string;
 }
 
 export async function getQuizQuestions(): Promise<QuizQuestions[]> {
