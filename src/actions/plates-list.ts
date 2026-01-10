@@ -1,4 +1,4 @@
-import type { LicensePlateApi, FunFact, LicensePlate } from "./license-plate";
+import type { LicensePlateApi, LicensePlate } from "./license-plate";
 
 export async function getPlatesList(
   voivodeship: string,

@@ -44,7 +44,8 @@
 }
 
 @keyframes breath {
-  0%, 100% {
+  0%,
+  100% {
     transform: scale(1);
     opacity: 0.6;
   }
@@ -106,11 +107,29 @@
   box-shadow: 0 0 30px 2px rgba(59, 130, 246, 0.3);
 }
 
-.filter{
+.filter {
   border: 1px solid rgba(255, 255, 255, 0.05);
 }
 .filter:hover {
   border-color: rgba(59, 130, 246, 0.5);
   transform: translateY(-1px);
   box-shadow: 0 0 30px 2px rgba(59, 130, 246, 0.3);
+}
+
+path[id^="PL-"] {
+  fill: #d9e3f0;
+  stroke: #ffffff;
+  stroke-width: 1.2;
+  transition: fill 0.2s ease;
+}
+
+path[id^="PL-"]:hover {
+  fill: #8bb5e0;
+  cursor: pointer;
+}
+
+#map-container svg {
+  width: 100% !important;
+  height: auto !important;
+  display: block;
 }
