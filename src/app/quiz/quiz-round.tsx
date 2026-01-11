@@ -6,7 +6,7 @@ import { useState, useEffect, useRef } from "react";
 import { useDistricts } from "@/hooks/use-districts";
 import QuizRanking from "./quiz-ranking";
 
-export default function QuizRound() {
+export default function QuizRound({ nick }: { nick: string }): React.ReactNode {
   const { data: q, isLoading } = useQuizQuestions();
   const [current, setCurrent] = useState(0);
   const [answerStatus, setAnswerStatus] = useState<"correct" | "wrong" | null>(
@@ -17,6 +17,7 @@ export default function QuizRound() {
   const [stage, setStage] = useState<"voivodeship" | "district">("voivodeship");
   const [districtAttempts, setDistrictAttempts] = useState(3);
   const MAX_TIME_PER_QUESTION = 60;
+  const [quizStartTime] = useState(() => Date.now());
   const [totalScore, setTotalScore] = useState(0);
   const questionStartRef = useRef(0);
   const quizStartRef = useRef(0);
@@ -84,9 +85,9 @@ export default function QuizRound() {
     if (!question) return;
 
     const isCorrect =
-      selectedDistrict.toLocaleLowerCase() === question.code.toLowerCase();
+      selectedDistrict.toLocaleLowerCase() === question.district.toLowerCase();
     console.log(`wybrana: ${selectedDistrict}`);
-    console.log(`poprawna: ${question.code}`);
+    console.log(`poprawna: ${question.district}`);
 
     if (isCorrect) {
       const timeTakenDistrict = Math.floor(
@@ -167,7 +168,13 @@ export default function QuizRound() {
   }
 
   if (!question) {
-    return <QuizRanking points={totalScore} />;
+    return (
+      <QuizRanking
+        points={totalScore}
+        playerName={nick}
+        quizStartTime={quizStartTime}
+      />
+    );
   }
 
   const minutes = Math.floor(elapsedSeconds / 60);
@@ -176,7 +183,6 @@ export default function QuizRound() {
   return (
     <div className="min-h-screen bg-[#0f172a] flex flex-col items-center justify-center">
       <div className="fixed top-5 left-5 flex items-center z-50">
-        <span className="text-2xl mr-2">⏱️</span>
         <div className="flex flex-col">
           <span className="text-xs uppercase font-bold text-gray-500">
             Czas
@@ -186,15 +192,12 @@ export default function QuizRound() {
           </span>
         </div>
       </div>
-      <div className="fixed top-5 right-5 flex items-center bg-white px-4 py-2 rounded-full border-2 border-blue-400 shadow-lg z-50">
-        <span className="text-2xl mr-2">🏆</span>
+      <div className="fixed top-5 right-5 flex items-center bg-[#1f1f1f] px-4 py-2 rounded-xl border-2 border-blue-400 shadow-lg z-50">
         <div className="flex flex-col">
           <span className="text-xs uppercase font-bold text-gray-500">
             Punkty
           </span>
-          <span className="text-xl font-black text-gray-800 leading-none">
-            {totalScore}
-          </span>
+          <span className="text-xl text-white sleading-none">{totalScore}</span>
         </div>
       </div>
       <div className="flex flex-col items-center justify-center w-full max-w-4xl mx-auto text-center">
@@ -206,7 +209,7 @@ export default function QuizRound() {
             KOD REJESTRACYJNY:
           </span>
           <span className="text-5xl font-mono font-black text-blue-500 tracking-tighter shadow-blue-500/20 drop-shadow-sm">
-            {question?.district}
+            {question?.code}
           </span>
         </div>
         {stage === "voivodeship" && (
@@ -264,7 +267,7 @@ export default function QuizRound() {
                 ) : null}
                 {districtAttempts == 0 && (
                   <span className="text-red-400">
-                    Poprawna odpowiedź to {question.code}.
+                    Poprawna odpowiedź to {question.district}.
                   </span>
                 )}
                 {attempts == 0 && (
