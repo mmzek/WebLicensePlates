@@ -1,12 +1,14 @@
+"use client";
 import { useHallOfFame } from "../../hooks/use-hall-of-fame";
 import { saveResult } from "../../actions/user";
 import { getUserId } from "../../actions/user-storage";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef} from "react";
 
 interface LeaderboardEntry {
   position: number;
   userName: string;
   totalScore: number;
+  lastScore?: number;
 }
 
 export default function QuizRanking({
@@ -18,16 +20,23 @@ export default function QuizRanking({
   playerName: string;
   quizStartTime: number;
 }) {
-  const { data, isLoading, isError } = useHallOfFame();
+  const { data, isLoading, isError, refetch } = useHallOfFame();
   const hasSaved = useRef(false);
+  const hasHydrated = useRef(false);
 
   useEffect(() => {
     if (hasSaved.current) return;
+
+    if (!hasHydrated.current) {
+      hasHydrated.current = true;
+      return;
+    }
 
     const saveScore = async () => {
       const userId = getUserId();
 
       if (!userId) {
+        console.error("Brak userId");
         return;
       }
 
@@ -39,14 +48,25 @@ export default function QuizRanking({
 
       try {
         const quizEnd = Date.now();
+        const userIdNumber = parseInt(userId, 10);
+
+        if (isNaN(userIdNumber)) {
+          console.error("userId nie jest liczbą:", userId);
+          hasSaved.current = false;
+          return;
+        }
+
         const payload = {
-          userId,
+          userId: userIdNumber,
           score: points,
           quizStart: new Date(quizStartTime).toISOString(),
           quizEnd: new Date(quizEnd).toISOString(),
         };
 
         await saveResult(payload);
+
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+        await refetch();
       } catch (error) {
         console.error("Błąd zapisu wyniku:", error);
         hasSaved.current = false;
@@ -54,7 +74,11 @@ export default function QuizRanking({
     };
 
     saveScore();
-  }, [points, quizStartTime]);
+  }, [points, quizStartTime, refetch]);
+
+  const handlePlayAgain = () => {
+    window.location.href = "/quiz";
+  };
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-[#0f172a] z-50">
@@ -96,7 +120,7 @@ export default function QuizRanking({
                 <div
                   key={index}
                   className={`flex items-center justify-between p-3 rounded-xl ${
-                    d.userName === playerName && d.totalScore === points
+                    d.userName === playerName
                       ? "bg-blue-400/20 border"
                       : "bg-[#1f1f1f]"
                   }`}
@@ -115,7 +139,7 @@ export default function QuizRanking({
           </div>
         </div>
         <button
-          onClick={() => window.location.reload()}
+          onClick={handlePlayAgain}
           className="bg-blue-400 px-4 py-2 rounded-xl text-black font-bold filter"
         >
           ZAGRAJ PONOWNIE

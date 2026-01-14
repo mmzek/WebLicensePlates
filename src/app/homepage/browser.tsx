@@ -9,7 +9,10 @@ import {
   CommandList,
 } from "@/components/ui/command";
 
-export default function Browser() {
+export interface BrowserProps{
+  onSelectPlate: (val: string) => void;
+}
+export default function Browser({onSelectPlate} :BrowserProps) {
   const [inputValue, setInputValue] = useState("");
   const [debouncedValue, setDebouncedValue] = useState("");
 
@@ -27,6 +30,15 @@ export default function Browser() {
   const isEmpty = !searchCode;
 
   const { data: licensePlates = [], isLoading } = useLicensePlates(searchCode);
+  
+  const platesArray = Array.isArray(licensePlates) ? licensePlates : [];
+
+  const handleSelectPlate = (code: string) => {
+    setInputValue("");
+    setDebouncedValue("");
+    onSelectPlate(code);
+  };
+
   return (
     <div className="px-4 py-6">
       <h1 className="text-xs font-bold uppercase tracking-widest text-blue-400">
@@ -42,12 +54,12 @@ export default function Browser() {
         <CommandList>
           {isLoading && <CommandItem disabled>Ładowanie...</CommandItem>}
 
-          {!isEmpty && licensePlates.length == 0 && (
+          {!isEmpty && platesArray.length == 0 && (
             <CommandItem disabled>Nie znaleziono kodu rejestracji</CommandItem>
           )}
 
-          {licensePlates.map((plate) => (
-            <CommandItem key={plate.code} value={plate.code}>
+          {platesArray.map((plate) => (
+            <CommandItem key={plate.code} onSelect={()=>handleSelectPlate(plate.code)} value={plate.code}>
               <div className="flex flex-col">
                 <span className="font-semibold">{plate.code}</span>
                 <span className="text-sm opacity-80">

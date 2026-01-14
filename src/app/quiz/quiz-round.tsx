@@ -54,13 +54,10 @@ export default function QuizRound({ nick }: { nick: string }): React.ReactNode {
 
     const isCorrect =
       selectedVoivodeship.toLowerCase() === question.voivodeship.toLowerCase();
-    console.log(`wybrana: ${selectedVoivodeship}`);
-    console.log(`poprawna: ${question.voivodeship}`);
 
     if (isCorrect) {
       const speedBonus = Math.max(MAX_TIME_PER_QUESTION - timeTaken, 0);
       const pointsForThisQuestion = attempts * speedBonus;
-      console.log(`${attempts} * ${speedBonus} = ${pointsForThisQuestion}`);
 
       setTotalScore((prev) => prev + pointsForThisQuestion);
       setAnswerStatus("correct");
@@ -86,8 +83,6 @@ export default function QuizRound({ nick }: { nick: string }): React.ReactNode {
 
     const isCorrect =
       selectedDistrict.toLocaleLowerCase() === question.district.toLowerCase();
-    console.log(`wybrana: ${selectedDistrict}`);
-    console.log(`poprawna: ${question.district}`);
 
     if (isCorrect) {
       const timeTakenDistrict = Math.floor(
@@ -98,9 +93,6 @@ export default function QuizRound({ nick }: { nick: string }): React.ReactNode {
         0,
       );
       const districtScore = 2 * districtAttempts * speedBonusDistrict;
-      console.log(
-        `[SCORING] powiat: 2 * ${districtAttempts} * ${speedBonusDistrict} = ${districtScore}`,
-      );
       setTotalScore((prev) => prev + districtScore);
       setAnswerStatus("correct");
       setLocked(true);

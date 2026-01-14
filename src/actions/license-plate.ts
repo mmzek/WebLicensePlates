@@ -1,15 +1,8 @@
-export interface FunFact {
-  description: string;
-  imageUrl: string;
-  source: string;
-}
-
-export interface LicensePlate {
+export interface LicensePlates {
   code: string;
   district: string;
   voivodeship: string;
   type: string;
-  funFacts: FunFact[];
   numberOfViews: number;
 }
 
@@ -38,7 +31,7 @@ export interface LicensePlateApi {
 
 export async function getLicensePlatesByCode(
   code: string,
-): Promise<LicensePlate[]> {
+): Promise<LicensePlates[]> {
   if (!code) return [];
 
   const url = process.env.NEXT_PUBLIC_API_URL;
@@ -54,16 +47,11 @@ export async function getLicensePlatesByCode(
   const data = await response.json();
 
   return data.map(
-    (item: LicensePlateApi): LicensePlate => ({
+    (item: LicensePlateApi): LicensePlates => ({
       code: item.code,
       district: item.district.name,
       voivodeship: item.district.voivodeship.name,
       type: item.type.type,
-      funFacts: item.funFacts.map((ff) => ({
-        description: ff.description,
-        imageUrl: ff.imageUrl,
-        source: ff.source,
-      })),
       numberOfViews: item.numberOfViews,
     }),
   );

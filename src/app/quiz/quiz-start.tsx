@@ -1,4 +1,5 @@
-import { useState } from "react";
+"use client";
+import { useState, useEffect } from "react";
 import {
   getUserId,
   getUserName,
@@ -7,60 +8,139 @@ import {
   clearUserData,
 } from "../../actions/user-storage";
 import { useCreateUser } from "../../hooks/use-create-user";
+import { useHallOfFame } from "../../hooks/use-hall-of-fame";
+
+interface LeaderboardEntry {
+  position: number;
+  userName: string;
+  totalScore: number;
+}
+
+interface UserState {
+  nick: string;
+  savedName: string;
+  existingUserId: string | null;
+}
 
 export default function QuizStart({
   onStart,
 }: {
   onStart: (nick: string) => void;
 }) {
-  const [nick, setNick] = useState(() => getUserName());
-  const [savedName] = useState(() => getUserName());
+  const [userState, setUserState] = useState<UserState>({
+    nick: "",
+    savedName: "",
+    existingUserId: null,
+  });
+  const [error, setError] = useState("");
+  const [isHydrated, setIsHydrated] = useState(false);
   const createUser = useCreateUser();
-  const existingUserId = getUserId();
+  const { data: hallOfFame } = useHallOfFame();
+
+  useEffect(() => {
+    const userId = getUserId();
+    const userName = getUserName();
+    
+    // eslint-disable-next-line react-hooks/set-state-in-effect
+    setUserState({
+      nick: userName,
+      savedName: userName,
+      existingUserId: userId,
+    });
+    setIsHydrated(true);
+  }, []);
 
   const handleStart = () => {
-    if (!nick.trim()) {
+    if (!isHydrated) {
+      console.error("Hydration nie gotowa");
       return;
     }
 
-    const nickChanged = savedName && savedName !== nick.trim();
+    if (!userState.nick.trim()) {
+      return;
+    }
 
-    if (nickChanged && existingUserId) {
+    setError("");
+
+    const nickChanged = userState.savedName && userState.savedName !== userState.nick.trim();
+
+    if (nickChanged && userState.existingUserId) {
       clearUserData();
-    }
-
-    if (existingUserId && !nickChanged) {
-      setUserName(nick);
-      onStart(nick);
+      setUserState(prev => ({ ...prev, existingUserId: null }));
+      setUserName(userState.nick);
+      
+      createUser.mutate(
+        { name: userState.nick },
+        {
+          onSuccess: (data) => {
+            if (data && data.userId) {
+              setUserId(String(data.userId));
+            }
+            onStart(userState.nick);
+          },
+          onError: (error) => {
+            console.error("Błąd tworzenia użytkownika:", error);
+            setError("Błąd tworzenia użytkownika. Spróbuj ponownie.");
+          },
+        },
+      );
       return;
     }
 
-    setUserName(nick);
+    if (userState.existingUserId && !nickChanged) {
+      setUserName(userState.nick);
+      onStart(userState.nick);
+      return;
+    }
+
+    setUserName(userState.nick);
 
     createUser.mutate(
-      { name: nick },
+      { name: userState.nick },
       {
         onSuccess: (data) => {
           if (data && data.userId) {
-            setUserId(data.userId);
+            setUserId(String(data.userId));
           }
-          onStart(nick);
+          onStart(userState.nick);
         },
         onError: (error) => {
           console.error("Błąd tworzenia użytkownika:", error);
+          setError("Błąd tworzenia użytkownika. Spróbuj ponownie.");
         },
       },
     );
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
-    if (e.key === "Enter" && !createUser.isPending && nick.trim()) {
+    if (e.key === "Enter" && !createUser.isPending && userState.nick.trim()) {
       handleStart();
     }
   };
 
-  const nickChanged = savedName && savedName !== nick.trim();
-  const isReturningUser = existingUserId && !nickChanged;
+  const handleNickChange = (newNick: string) => {
+    setUserState(prev => ({ ...prev, nick: newNick }));
+    
+    const nickChanged = userState.savedName && userState.savedName !== newNick.trim();
+    
+    if (hallOfFame && hallOfFame.length > 0 && newNick.trim()) {
+      const nickExists = hallOfFame.some(
+        (entry: LeaderboardEntry) => entry.userName.toLowerCase() === newNick.trim().toLowerCase(),
+      );
+      
+      if (nickExists && (!userState.existingUserId || nickChanged)) {
+        setError("Ten nick już istnieje! Jeśli to nie ty - wybierz inny.");
+      } else {
+        setError("");
+      }
+    } else {
+      setError("");
+    }
+  };
+
+  const nickChanged = userState.savedName && userState.savedName !== userState.nick.trim();
+  const isReturningUser = userState.existingUserId && !nickChanged;
+  const showNewNickMessage = nickChanged && !error;
 
   return (
     <div className="min-h-screen bg-[#0f172a] flex items-center justify-center">
@@ -79,13 +159,13 @@ export default function QuizStart({
               htmlFor="nick"
               className="block text-sm font-semibold text-gray-300 mb-2"
             >
-              {existingUserId ? "Witaj ponownie!" : "Podaj swoją nazwę"}
+              {userState.existingUserId ? "Witaj ponownie!" : "Podaj swoją nazwę"}
             </label>
             <input
               id="nick"
               type="text"
-              value={nick}
-              onChange={(e) => setNick(e.target.value)}
+              value={userState.nick}
+              onChange={(e) => handleNickChange(e.target.value)}
               onKeyPress={handleKeyPress}
               maxLength={20}
               placeholder="Wpisz nick..."
@@ -97,14 +177,19 @@ export default function QuizStart({
 
           <button
             onClick={handleStart}
-            disabled={createUser.isPending || !nick.trim()}
+            disabled={!isHydrated || createUser.isPending || !userState.nick.trim()}
             className="bg-blue-400 px-4 py-2 rounded-xl text-black font-bold w-full filter"
           >
-            {" "}
             START QUIZU!
           </button>
 
-          {createUser.isError && (
+          {error && (
+            <div className="bg-purple-500/20 rounded-lg p-3 text-center">
+              <p className="text-purple-400 text-sm font-semibold">{error}</p>
+            </div>
+          )}
+
+          {createUser.isError && !error && (
             <div className="bg-red-500/20 rounded-lg p-3 text-center">
               <p className="text-red-400 text-sm font-semibold">
                 Błąd zapisu użytkownika
@@ -115,12 +200,12 @@ export default function QuizStart({
           {isReturningUser && (
             <div className="bg-green-500/20 rounded-lg p-3 text-center">
               <p className="text-green-400 text-xs">
-                Witaj ponownie, {savedName}!
+                Witaj ponownie, {userState.savedName}!
               </p>
             </div>
           )}
 
-          {nickChanged && (
+          {showNewNickMessage && (
             <div className="bg-blue-500/20 rounded-lg p-3 text-center">
               <p className="text-blue-400 text-xs">
                 Nowy nick - zostaniesz zarejestrowany jako nowy gracz

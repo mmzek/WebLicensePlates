@@ -3,12 +3,13 @@ import { useRouter } from "next/navigation";
 import Browser from "../homepage/browser";
 import Filters from "../homepage/filters";
 
-export interface FiltersProps {
-  selected: string | null;
-  onSelect: (val: string) => void;
+export interface SideBarProps {
+  selectedVoivodeship: string | null;
+  onSelectVoivodeship: (val: string) => void;
+  onSelectPlate: (val: string) => void;
 }
 
-export default function SideBar({ selected, onSelect }: FiltersProps) {
+export default function SideBar({ selectedVoivodeship, onSelectVoivodeship, onSelectPlate}: SideBarProps) {
   const router = useRouter();
   return (
     <div className="h-full w-1/4 bg-[#1f1f1f] overflow-y-auto command-scroll">
@@ -23,8 +24,8 @@ export default function SideBar({ selected, onSelect }: FiltersProps) {
           WEŹ UDZIAŁ W QUIZIE!
         </button>
       </div>
-      <Browser />
-      <Filters selected={selected} onSelect={onSelect} />
+      <Browser onSelectPlate={onSelectPlate} />
+      <Filters selectedVoivodeship={selectedVoivodeship} onSelectVoivodeship={onSelectVoivodeship}/>
     </div>
   );
 }
